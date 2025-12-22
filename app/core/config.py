@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     mysql_url: str = "mysql+pymysql://root:root@127.0.0.1:3306/uvp"
 
     # 环境变量名：REDIS_URL
-    redis_url: str = "redis://127.0.0.1:6379/0"
+    redis_url: str = "redis://:root@127.0.0.1:6379/1"
 
     # 环境变量名：TOKEN_EXPIRE_SECONDS
     token_expire_seconds: int = 1800
