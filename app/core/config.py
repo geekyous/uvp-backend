@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     )
 
     # 环境变量名：MYSQL_URL
-    MYSQL_URL: str = "mysql+pymysql://root:root@127.0.0.1:3306/uvp"
+    MYSQL_URL: str = "mysql+aiomysql://root:root@127.0.0.1:3306/uvp"
 
     # 环境变量名：REDIS_URL
     REDIS_URL: str = "redis://:root@127.0.0.1:6379/1"

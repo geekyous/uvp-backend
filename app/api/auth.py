@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.core.response import success, fail
 from app.services.auth_service import create_token, validate_token
+from app.services.credential import get_secret_by_ak
 
 router = APIRouter(prefix="/uvp-backend-common/api/v1")
 
@@ -11,8 +12,9 @@ router = APIRouter(prefix="/uvp-backend-common/api/v1")
              description="""
              根据应用集成的AK与SK，获取请求授权Token，Token默认访问有效期为30分钟。应用授权后，在有效时间内可以重复使用Token，请勿频繁授权。
              """)
-def authorization(ak: str, sk: str):
-    if ak != "test-ak" or sk != "test-sk":
+async def authorization(ak: str, sk: str):
+    security_key = await get_secret_by_ak(ak)
+    if not security_key or security_key != sk:
         return fail("AK/SK 无效")
 
     token = create_token(ak)

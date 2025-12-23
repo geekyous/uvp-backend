@@ -2,7 +2,7 @@ import time
 
 from fastapi import Request
 
-from app.core.cache import redis_client
+import app.core.cache as cache
 from app.core.config import settings
 from app.core.response import fail
 
@@ -24,13 +24,13 @@ async def verify_request(request: Request):
         return fail("请求已过期")
 
     nonce_key = f"nonce:{ak}:{nonce}"
-    if redis_client.exists(nonce_key):
+    if cache.redis_client.exists(nonce_key):
         return fail("重复请求")
 
-    await redis_client.setex(nonce_key, settings.NONCE_TTL_SECONDS, "1")
+    await cache.redis_client.setex(nonce_key, settings.NONCE_TTL_SECONDS, "1")
 
     token_key = f"token:{token}"
-    if not redis_client.exists(token_key):
+    if not cache.redis_client.exists(token_key):
         return fail("token无效")
 
     return None
