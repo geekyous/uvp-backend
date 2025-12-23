@@ -1,9 +1,12 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncEngine
+from sqlalchemy.orm import declarative_base
 
 from app.core.config import settings
 
 engine: AsyncEngine | None = None
 AsyncSessionLocal = None
+
+Base = declarative_base()
 
 
 async def init_mysql() -> None:
