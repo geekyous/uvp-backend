@@ -1,12 +1,16 @@
+import logging
+
 import uvicorn
 from fastapi import FastAPI, Request
 
 from app.api import auth
 from app.core.security import verify_request
+from app.core.lifespan import lifespan
 
 app = FastAPI(
     title="UVP平台服务目录",
-    description="UVP平台服务目录测试接口")
+    description="UVP平台服务目录测试接口",
+    lifespan=lifespan)
 
 app.include_router(auth.router)
 

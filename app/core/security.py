@@ -27,7 +27,7 @@ async def verify_request(request: Request):
     if redis_client.exists(nonce_key):
         return fail("重复请求")
 
-    redis_client.setex(nonce_key, settings.nonce_ttl_seconds, "1")
+    await redis_client.setex(nonce_key, settings.NONCE_TTL_SECONDS, "1")
 
     token_key = f"token:{token}"
     if not redis_client.exists(token_key):

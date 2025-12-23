@@ -8,7 +8,7 @@ def create_token(ak: str) -> str:
     token = str(uuid.uuid4())
     redis_client.setex(
         f"token:{token}",
-        settings.token_expire_seconds,
+        settings.TOKEN_EXPIRE_SECONDS,
         ak
     )
     return token
