@@ -5,9 +5,9 @@ from urllib.parse import urlencode
 from fastapi import Request
 
 import app.core.cache as cache
-from app.services.credential import get_secret_by_ak
 from app.core.config import settings
 from app.core.response import fail
+from app.services.credential import get_secret_by_ak
 
 
 async def verify_request(request: Request):
@@ -18,6 +18,7 @@ async def verify_request(request: Request):
     token = query.get("token")
     timestamp = query.get("timestamp")
     nonce = query.get("nonce")
+    cookie = query.get("cookie")
 
     if not all([ak, token, timestamp, nonce]):
         return fail("鉴权参数缺失")
