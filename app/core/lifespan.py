@@ -12,30 +12,30 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🚀 Application starting...")
+    print("🚀 Application starting...")
     # 初始化 Redis
     await init_redis()
-    logger.info("✅ Redis initialized")
+    print("✅ Redis initialized")
 
     await init_mysql()
-    logger.info("✅ MySQL initialized")
+    print("✅ MySQL initialized")
 
     # 校验 Redis
     await check_redis()
-    logger.info("✅ Redis connection OK")
+    print("✅ Redis connection OK")
 
     # 校验 MySQL
     await check_mysql()
-    logger.info("✅ MySQL connection OK")
+    print("✅ MySQL connection OK")
 
-    logger.info("🎉 Startup completed")
+    print("🎉 Startup completed")
     yield
-    logger.info("🛑 Application shutting down...")
+    print("🛑 Application shutting down...")
 
     # 关闭 Redis
     await close_redis()
-    logger.info("✅ Redis closed")
+    print("✅ Redis closed")
 
     # 关闭 MySQL
     await close_mysql()
-    logger.info("✅ MySQL closed")
+    print("✅ MySQL closed")

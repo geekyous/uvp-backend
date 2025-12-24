@@ -4,9 +4,9 @@ import app.core.cache as cache
 from app.core.config import settings
 
 
-def create_token(ak: str) -> str:
+async def create_token(ak: str) -> str:
     token = str(uuid.uuid4())
-    cache.redis_client.setex(
+    await cache.redis_client.setex(
         f"token:{token}",
         settings.TOKEN_EXPIRE_SECONDS,
         ak
@@ -14,8 +14,9 @@ def create_token(ak: str) -> str:
     return token
 
 
-def validate_token(token: str) -> str:
-    ttl = cache.redis_client.ttl(f"token:{token}")
-    if ttl <= 0:
-        return "0"
-    return str(ttl)
+async def validate_token(token: str):
+    ttl = await cache.redis_client.ttl(f"token:{token}")
+    print(ttl)
+    if ttl is None or ttl <= 0:
+        return 0
+    return ttl

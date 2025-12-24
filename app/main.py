@@ -1,6 +1,7 @@
 import logging
 
 import uvicorn
+import asyncio
 from fastapi import FastAPI, Request
 
 from app.api import auth
@@ -36,5 +37,18 @@ async def security_middleware(request: Request, call_next):
     return await call_next(request)
 
 
+async def main():
+    """异步主函数"""
+    config = uvicorn.Config(
+        app=app,
+        host="127.0.0.1",
+        port=8000,
+        log_level="info",
+        loop="asyncio"
+    )
+    server = uvicorn.Server(config)
+    await server.serve()
+
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    asyncio.run(main())
