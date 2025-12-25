@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 from fastapi import Request
 
 import app.core.cache as cache
-from app.core.config import settings
+from app.core.settings import settings
 from app.core.response import fail
 from app.services.credential import get_secret_by_ak
 

@@ -1,7 +1,7 @@
 import uuid
 
 import app.core.cache as cache
-from app.core.config import settings
+from app.core.settings import settings
 
 
 async def create_token(ak: str) -> str:

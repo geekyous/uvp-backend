@@ -1,4 +1,3 @@
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -6,8 +5,6 @@ from fastapi import FastAPI
 from app.core.cache import init_redis, close_redis
 from app.core.db import init_mysql, close_mysql
 from app.core.health import check_mysql, check_redis
-
-logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
