@@ -3,6 +3,7 @@ import logging
 from fastapi import APIRouter
 
 from app.core.feature.flag import is_feature_enabled
+from app.core.ratelimit.limit import allow_request
 from app.core.response import success, fail
 from app.models.auth_request import AuthRequest
 from app.services.auth_service import create_token, validate_token
@@ -26,7 +27,19 @@ async def authorization(auth_req: AuthRequest):
     security_key = await get_secret_by_ak(ak)
     if not security_key or security_key != sk:
         return fail("AK/SK 无效")
+
     is_v2 = await is_feature_enabled("auth_v2", ak)
+    if is_v2:
+        feature = "auth_v2"
+        limit = 10
+    else:
+        feature = "auth_v1"
+        limit = 10
+
+    rate_key = f"rate:{feature}:{ak}:/authorization"
+    allow = await allow_request(rate_key, limit, 60)
+    if not allow:
+        return fail("限流")
     logger.info(
         "feature decision",
         extra={
