@@ -1,18 +1,23 @@
-import logging
+import asyncio
 
 import uvicorn
-import asyncio
 from fastapi import FastAPI, Request
 
+from app.core.log.config import setup_logging
+
+setup_logging()
 from app.api import auth
-from app.core.security import verify_request
 from app.core.lifespan import lifespan
+
+from app.core.log.middleware import RequestIDMiddleware
+from app.core.security import verify_request
 
 app = FastAPI(
     title="UVP平台服务目录",
     description="UVP平台服务目录测试接口",
     lifespan=lifespan)
 
+app.add_middleware(RequestIDMiddleware)
 app.include_router(auth.router)
 
 
