@@ -1,11 +1,16 @@
+import logging
+
 from fastapi import APIRouter
 
+from app.core.feature.flag import is_feature_enabled
 from app.core.response import success, fail
 from app.models.auth_request import AuthRequest
 from app.services.auth_service import create_token, validate_token
 from app.services.credential import get_secret_by_ak
 
 router = APIRouter(prefix="/uvp-backend-common/api/v1")
+
+logger = logging.getLogger(__name__)
 
 
 @router.post("/authorization", tags=["应用集成授权"],
@@ -21,6 +26,15 @@ async def authorization(auth_req: AuthRequest):
     security_key = await get_secret_by_ak(ak)
     if not security_key or security_key != sk:
         return fail("AK/SK 无效")
+    is_v2 = await is_feature_enabled("auth_v2", ak)
+    logger.info(
+        "feature decision",
+        extra={
+            "feature": "auth_v2",
+            "enabled": is_v2,
+            "ak": ak,
+        }
+    )
     token = await create_token(ak)
     return success({
         "ak": ak,
