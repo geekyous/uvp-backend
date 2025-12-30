@@ -52,7 +52,21 @@ Windows：
 
 `.venv\Scripts\activate`
 
-2. 安装依赖
+3. 安装依赖
+
+- 升级 pip
+
+`pip install --upgrade pip`
+
+- 安装依赖管理工具 pip-tools
+
+`pip install pip-tools`
+
+- 生成依赖
+
+`pip-compile requirements/dev.in`
+
+- 安装依赖
 
 `pip install -r requirements/dev.txt`
 

@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from app.core.feature.flag import is_feature_enabled
 from app.core.ratelimit.limit import allow_request
 from app.core.response import success, fail
-from app.models.auth_request import AuthRequest
+from app.models.request_params import AuthRequest, ValidateTokenRequest
 from app.services.auth_service import create_token, validate_token
 from app.services.credential import get_secret_by_ak
 
@@ -58,6 +58,6 @@ async def authorization(auth_req: AuthRequest):
 @router.post("/validateToken", tags=["应用集成授权"],
              summary="token验证",
              description="验证token是否有效。过期或无效返回0，有效则返回过期时间（单位：秒）")
-async def validate_token_api(token: str):
-    ttl = await validate_token(token)
+async def validate_token_api(token_req: ValidateTokenRequest):
+    ttl = await validate_token(token_req.token)
     return success(ttl)

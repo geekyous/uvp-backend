@@ -9,7 +9,13 @@ async def init_redis():
     """初始化 Redis"""
     global redis_client
     if redis_client is None:
-        redis_client = Redis.from_url(settings.REDIS_URL, decode_responses=True)
+        redis_client = Redis(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            db=settings.REDIS_DB,
+            password=settings.REDIS_PASSWORD,
+            decode_responses=True,
+        )
 
 
 async def close_redis() -> None:

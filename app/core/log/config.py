@@ -4,7 +4,6 @@ from app.core.log.filter import RequestIdFilter
 
 
 def setup_logging():
-    print(">>>>>>> setup logging")
     dictConfig({
         "version": 1,
         "filters": {

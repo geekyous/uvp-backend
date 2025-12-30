@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request
 from app.core.log.config import setup_logging
 
 setup_logging()
-from app.api import auth
+from app.api import auth, resources
 from app.core.lifespan import lifespan
 
 from app.core.log.middleware import RequestIDMiddleware
@@ -19,6 +19,7 @@ app = FastAPI(
 
 app.add_middleware(RequestIDMiddleware)
 app.include_router(auth.router)
+app.include_router(resources.router)
 
 
 @app.middleware("http")

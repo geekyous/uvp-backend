@@ -1,3 +1,4 @@
+from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncEngine
 from sqlalchemy.orm import declarative_base
 
@@ -13,8 +14,16 @@ async def init_mysql() -> None:
     """初始化 MySQL"""
     global engine, AsyncSessionLocal
     if engine is None:
+        mysql_url = URL.create(
+            drivername="mysql+aiomysql",
+            host=settings.MYSQL_HOST,
+            port=settings.MYSQL_PORT,
+            database=settings.MYSQL_DATABASE,
+            username=settings.MYSQL_USER,
+            password=settings.MYSQL_PASSWORD,
+        )
         engine = create_async_engine(
-            settings.MYSQL_URL,
+            mysql_url,
             pool_pre_ping=True,
             pool_size=5,
             max_overflow=10,
