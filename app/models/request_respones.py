@@ -113,3 +113,17 @@ class QueryResourcesVO(BaseModel):
         ge=0,
         le=1
     )
+
+    class Config:
+        # 关键配置：允许任意类型，并设置编码器
+        arbitrary_types_allowed = True
+
+        # 配置 JSON 编码器
+        json_encoders = {
+            Decimal: lambda v: str(v) if v is not None else None,
+            # 如果有其他自定义类型，也在这里添加
+        }
+
+        # 如果需要从数据库 ORM 对象转换
+        orm_mode = True
+

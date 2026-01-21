@@ -1,6 +1,14 @@
 from typing import List
 
+from fastapi import Query
 from pydantic import BaseModel, Field
+
+
+class AuthParams(BaseModel):
+    ak: str = Query(..., description="AccessKey")
+    token: str = Query(..., description="访问令牌")
+    nonce: str = Query(..., description="随机数")
+    timestamp: int = Query(..., description="时间戳")
 
 
 class AuthRequest(BaseModel):
