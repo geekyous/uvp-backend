@@ -1,5 +1,5 @@
 from sqlalchemy.engine.url import URL
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncEngine
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncEngine, AsyncSession
 from sqlalchemy.orm import declarative_base
 
 from app.core.settings import settings
@@ -27,6 +27,7 @@ async def init_mysql() -> None:
             pool_pre_ping=True,
             pool_size=5,
             max_overflow=10,
+            echo=True,
         )
         AsyncSessionLocal = async_sessionmaker(
             engine,
@@ -40,3 +41,8 @@ async def close_mysql() -> None:
     if engine:
         await engine.dispose()
         engine = None
+
+
+async def get_session() -> AsyncSession:
+    async with AsyncSessionLocal as session:
+        yield session

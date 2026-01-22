@@ -35,7 +35,7 @@ async def auth_dependency(auth: AuthParams = Depends()):
         raise AuthException("AK 无效")
 
 
-def check_timestamp(ts: int):
+def check_timestamp(ts: float):
     """时间窗口校验"""
     now = int(time.time())
     if abs(now - ts) > settings.NONCE_TTL_SECONDS:

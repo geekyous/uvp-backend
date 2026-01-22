@@ -2,10 +2,11 @@ import asyncio
 
 import uvicorn
 from fastapi import FastAPI, Request
+from starlette.responses import JSONResponse
 
 from app.core.exception import AuthException, BizException
 from app.core.log.config import setup_logging
-from app.core.response import fail
+from app.core.response import ApiResponse
 
 setup_logging()
 from app.core.lifespan import lifespan
@@ -21,12 +22,28 @@ include_routes(app)
 
 @app.exception_handler(AuthException)
 async def auth_exception_handler(request: Request, exc: AuthException):
-    return fail(hint=str(exc))
+    return JSONResponse(
+        status_code=401,
+        content=ApiResponse(
+            successful="true",
+            resultCode=200,
+            resultHint=str(exc),
+            resultValue=None
+        ).model_dump()
+    )
 
 
 @app.exception_handler(BizException)
 async def biz_exception_handler(request: Request, exc: BizException):
-    return fail(hint=str(exc))
+    return JSONResponse(
+        status_code=200,
+        content=ApiResponse(
+            successful="true",
+            resultCode=500,
+            resultHint=str(exc),
+            resultValue=None
+        ).model_dump()
+    )
 
 
 async def main():

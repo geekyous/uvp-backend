@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from app.core.response import success, ApiResponse
 from app.core.security import auth_dependency
 from app.models.request_params import QueryResource
-from app.models.request_respones import QueryResourcesVO
+from app.services.resources_service import get_resource
 
 router = APIRouter(prefix="/uvp-backend-common/api/v1", tags=["资源服务"], dependencies=[Depends(auth_dependency)], )
 
@@ -11,36 +11,9 @@ router = APIRouter(prefix="/uvp-backend-common/api/v1", tags=["资源服务"], d
 @router.post("/resource/queryResources", summary="逐层查询资源树信息",
              description="逐层获取资源树资源信息", response_model=ApiResponse)
 async def query_resources(query_request: QueryResource):
-    qqq = QueryResourcesVO(
-        id="b26c9ae118e44bb1aaf64742cc2b1fe2",
-        text="图片机21",
-        devShortName="",
-        pNotes=None,
-        pCode=None,
-        url=None,
-        openType=0,
-        pid="8111d03baaed4a00a9ef6a48fd935d04",
-        path="南京/输电/南瑞路/图片机21",
-        type=0,
-        isGroup=0,
-        isAvailable=1,
-        order=3322,
-        hasChildren=False,
-        status=1,
-        isOuternet=0,
-        sDecodeTag="100",
-        devCode="100110000003090014",
-        devType="09",
-        lng=None,
-        lat=None,
-        childrenCount=0,
-        gisPeerCode=None,
-        childNodes=[],
-        sysInfoCode=None,
-        dvrCode=None,
-        isCheck=False,
-        fontTypeCode=None,
-        peerId=None,
-        audio=None,
-    )
-    return success(qqq)
+    dev_type = query_request.devType
+    status = query_request.status
+    pid = query_request.pid
+    protocol_type = query_request.protocolType
+    resource_list = await get_resource(pid, dev_type, protocol_type, status)
+    return success(resource_list)
