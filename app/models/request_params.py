@@ -1,3 +1,4 @@
+import time
 from typing import List
 
 from fastapi import Query
@@ -8,7 +9,7 @@ class AuthParams(BaseModel):
     ak: str = Query(..., description="AccessKey")
     token: str = Query(..., description="访问令牌")
     nonce: str = Query(..., description="随机数")
-    timestamp: int = Query(..., description="时间戳")
+    timestamp: float = Query(time.time(), description="时间戳")
 
 
 class AuthRequest(BaseModel):
