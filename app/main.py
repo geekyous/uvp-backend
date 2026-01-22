@@ -1,24 +1,32 @@
 import asyncio
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
+from app.core.exception import AuthException, BizException
 from app.core.log.config import setup_logging
+from app.core.response import fail
 
 setup_logging()
-from app.api import auth, resources
 from app.core.lifespan import lifespan
-
-from app.core.log.middleware import RequestIDMiddleware
+from app.core.routers import include_routes
 
 app = FastAPI(
     title="UVP平台服务目录",
     description="UVP平台服务目录测试接口",
     lifespan=lifespan)
 
-app.add_middleware(RequestIDMiddleware)
-app.include_router(auth.router)
-app.include_router(resources.router)
+include_routes(app)
+
+
+@app.exception_handler(AuthException)
+async def auth_exception_handler(request: Request, exc: AuthException):
+    return fail(hint=str(exc))
+
+
+@app.exception_handler(BizException)
+async def biz_exception_handler(request: Request, exc: BizException):
+    return fail(hint=str(exc))
 
 
 async def main():

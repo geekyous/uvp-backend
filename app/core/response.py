@@ -1,6 +1,7 @@
 from typing import Optional, Any
 
 from pydantic import BaseModel
+from starlette.responses import JSONResponse
 
 
 class ApiResponse(BaseModel):
@@ -10,19 +11,25 @@ class ApiResponse(BaseModel):
     resultValue: Optional[Any]
 
 
-def success(data=None, hint="调用成功"):
-    return ApiResponse(
-        successful="true",
-        resultValue=data,
-        resultHint=hint,
-        resultCode=200
+def success(data: Any = None, result_hint="调用成功") -> JSONResponse:
+    return JSONResponse(
+        status_code=200,
+        content=ApiResponse(
+            successful="true",
+            resultCode=200,
+            resultHint=result_hint,
+            resultValue=data
+        ).model_dump()
     )
 
 
-def fail(result_code=500, hint="调用失败"):
-    return ApiResponse(
-        successful="false",
-        resultValue=None,
-        resultHint=hint,
-        resultCode=result_code
+def fail(hint: str = "调用失败", result_code: int = 500) -> JSONResponse:
+    return JSONResponse(
+        status_code=200,
+        content=ApiResponse(
+            successful="true",
+            resultCode=result_code,
+            resultHint=hint,
+            resultValue=None
+        ).model_dump()
     )

@@ -6,7 +6,6 @@ from fastapi import Depends
 
 import app.core.cache as cache
 from app.core.exception import AuthException
-from app.core.response import fail
 from app.core.settings import settings
 from app.models.request_params import AuthParams
 from app.services.credential import get_secret_by_ak
@@ -23,33 +22,24 @@ async def auth_dependency(auth: AuthParams = Depends()):
     if not all([ak, token, timestamp, nonce]):
         raise AuthException("鉴权参数缺失")
 
-    try:
-        check_timestamp(timestamp)
-    except Exception as e:
-        raise AuthException(str(e))
+    check_timestamp(timestamp)
 
-    try:
-        await check_replay(ak, nonce)
-    except Exception as e:
-        raise AuthException(str(e))
+    await check_replay(ak, nonce)
 
     token_key = f"token:{token}"
     if not await cache.redis_client.exists(token_key):
         raise AuthException("token无效")
 
-    security_key = get_secret_by_ak(ak)
+    security_key = await get_secret_by_ak(ak)
     if not security_key:
         raise AuthException("AK 无效")
-
-    return None
 
 
 def check_timestamp(ts: int):
     """时间窗口校验"""
     now = int(time.time())
     if abs(now - ts) > settings.NONCE_TTL_SECONDS:
-        return fail(hint="请求已过期")
-    return None
+        raise AuthException("请求已过期")
 
 
 async def check_replay(ak: str, nonce: str):
@@ -57,8 +47,7 @@ async def check_replay(ak: str, nonce: str):
     nonce_key = f"nonce:{ak}:{nonce}"
     success = await cache.redis_client.set(nonce_key, "1", nx=True, ex=settings.NONCE_TTL_SECONDS)
     if not success:
-        return fail(hint="重复请求")
-    return None
+        raise AuthException("重复请求")
 
 
 def verify_sign(secret_key: str, query: dict, body: dict):
