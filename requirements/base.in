@@ -6,3 +6,4 @@ aiomysql
 pydantic
 pydantic-settings
 python-dotenv
+faker
