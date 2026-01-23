@@ -13,16 +13,14 @@ async def get_resource(pid, dev_type, protocol_type, status) -> List[QueryResour
     async with db.AsyncSessionLocal() as session:
 
         stmt = select(DeviceResource)
-        # if pid is not None:
-        #     stmt = stmt.where(DeviceResource.pid == pid)
-        # else:
-        #     stmt = stmt.where(DeviceResource.pid.is_(None))
-        #
-        # if dev_type:
-        #     stmt = stmt.where(DeviceResource.dev_type.in_(dev_type))
-        #
-        # if status is not None:
-        #     stmt = stmt.where(DeviceResource.status == status)
+        if pid:
+            stmt = stmt.where(DeviceResource.pid == pid)
+
+        if dev_type:
+            stmt = stmt.where(DeviceResource.dev_type.in_(dev_type))
+
+        if status:
+            stmt = stmt.where(DeviceResource.status == status)
 
         stmt = stmt.order_by(DeviceResource.created_time.asc())
 
