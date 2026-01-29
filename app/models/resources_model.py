@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import String, Integer, Boolean, Text, DateTime, DECIMAL
+from sqlalchemy import String, Integer, Boolean, Text, DateTime, DECIMAL, Float
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -43,18 +43,30 @@ class DeviceResource(Base):
     # 地理位置
     lng: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(10, 6), comment="经度位置")
     lat: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(10, 6), comment="纬度位置")
+    tower_id: Mapped[Optional[str]] = mapped_column(String(32), comment="杆塔Id")
+    audio: Mapped[Optional[int]] = mapped_column(Integer, default=0, comment="是否包含音频，0：否，1：是")
 
     # 统计和关联
     children_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, comment="子节点数量")
+    online_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, comment="在线点数量")
     gis_peer_code: Mapped[Optional[str]] = mapped_column(String(100), comment="GIS侧标识设备的编码")
+    plat_code: Mapped[Optional[str]] = mapped_column(String(100), comment="平台编码")
+    resource_attr: Mapped[Optional[str]] = mapped_column(String(100), comment="资源属性")
+    resource_type: Mapped[Optional[str]] = mapped_column(String(100), comment="资源类型。1:区域；2:场景；3:专业")
+    protocol_type: Mapped[Optional[str]] = mapped_column(String(16),
+                                                         comment="协议类型 0：I1；1：非标；2：企标2014；3：企标2020；4：国标2016；")
+
     sys_info_code: Mapped[Optional[str]] = mapped_column(String(100), comment="设备所属前端编码")
     dvr_code: Mapped[Optional[str]] = mapped_column(String(100), comment="dvr编码")
     is_check: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, comment="设备是否关联dvr true:是；false:否")
+    self_data: Mapped[Optional[str]] = mapped_column(String, comment="")
+    socre: Mapped[Optional[float]] = mapped_column(Float, comment="")
+    coordinate: Mapped[Optional[str]] = mapped_column(String(100), comment="")
+    use_status: Mapped[Optional[str]] = mapped_column(String(10), comment="")
 
     # 其他信息
     font_type_code: Mapped[Optional[str]] = mapped_column(String(2), comment="电压等级")
     peer_id: Mapped[Optional[str]] = mapped_column(String(50), comment="协议编码")
-    audio: Mapped[Optional[int]] = mapped_column(Integer, default=0, comment="是否包含音频，0：否，1：是")
 
     # 时间戳
     created_time: Mapped[Optional[datetime]] = mapped_column(
