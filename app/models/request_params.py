@@ -1,8 +1,11 @@
 import time
-from typing import List
+from datetime import date, datetime
+from typing import List, Optional
 
 from fastapi import Query
 from pydantic import BaseModel, Field
+
+from app.models.base import CamelCaseModel
 
 
 class AuthParams(BaseModel):
@@ -48,3 +51,23 @@ class QueryResource(BaseModel):
     设备状态。
     0:不在线;1:在线;2:不可用。
     注：此参数在查场景下的设备时有效，不传则不过滤。""")
+
+class BoxTalkCreate(CamelCaseModel):
+    off_online_flag: int
+    prj_name: str
+    prj_code: str
+    ticket_id: str
+    ticket_no: str
+    current_constr_headcount: int
+    current_constr_date: date
+
+    re_assessment_risk_level: Optional[int] = None
+    construction_headcount: Optional[int] = None
+    work_start_time: Optional[datetime] = None
+    current_construction_status: Optional[str] = None
+    work_overnight_flag: Optional[int] = None
+    tool_box_talk_address: Optional[str] = None
+    tool_box_talk_longitude: Optional[str] = None
+    tool_box_talk_latitude: Optional[str] = None
+    build_unit_code: Optional[str] = None
+    province_code: Optional[str] = None
