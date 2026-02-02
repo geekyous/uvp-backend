@@ -1,9 +1,10 @@
-from app.core.db import Base
+from datetime import datetime
 
 from sqlalchemy import String, Integer, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
-from datetime import datetime
+from app.models.base import Base
+
 
 class ApiCredential(Base):
     __tablename__ = "api_credential"

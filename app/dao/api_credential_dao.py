@@ -1,27 +1,27 @@
 from datetime import datetime
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-import app.core.db as db
 from app.models.api_credential import ApiCredential
 
 
-async def get_secret_by_ak(access_key: str) -> str | None:
-    """
-    根据 AK 获取 SK
-    """
-    async with db.AsyncSessionLocal() as session:
-        stmt = select(ApiCredential).where(
+class ApiCredentialDao:
+
+    @staticmethod
+    async def get_secret_by_ak(db: AsyncSession, access_key: str) -> str | None:
+        """
+        根据 AK 获取 SK
+        """
+        result = await db.execute(select(ApiCredential)
+        .where(
             ApiCredential.access_key == access_key,
             ApiCredential.status == 1
         )
-        result = await session.execute(stmt)
+        )
         cred = result.scalar_one_or_none()
-
-        if not cred:
+        if cred is None:
             return None
-
         if cred.expire_at and cred.expire_at < datetime.utcnow():
             return None
-
         return cred.secret_key

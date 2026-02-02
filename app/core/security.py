@@ -4,11 +4,12 @@ from urllib.parse import urlencode
 
 from fastapi import Depends
 
-import app.core.cache as cache
-from app.core.exception import AuthException
-from app.core.settings import settings
-from app.models.request_params import AuthParams
-from app.services.credential import get_secret_by_ak
+from app.core import cache
+from app.core.config import settings
+from app.core.database import get_db
+from app.exceptions.exceptions import AuthException
+from app.schemas.auth_params import AuthParams
+from app.services.token_service import TokenService
 
 
 async def auth_dependency(auth: AuthParams = Depends()):
@@ -27,10 +28,10 @@ async def auth_dependency(auth: AuthParams = Depends()):
     await check_replay(ak, nonce)
 
     token_key = f"token:{token}"
-    if not await cache.redis_client.exists(token_key):
+    if not await cache.get_redis().exists(token_key):
         raise AuthException("token无效")
 
-    security_key = await get_secret_by_ak(ak)
+    security_key = await TokenService.get_secret_by_ak(get_db(), ak)
     if not security_key:
         raise AuthException("AK 无效")
 
@@ -45,7 +46,7 @@ def check_timestamp(ts: float):
 async def check_replay(ak: str, nonce: str):
     """防重防校验"""
     nonce_key = f"nonce:{ak}:{nonce}"
-    success = await cache.redis_client.set(nonce_key, "1", nx=True, ex=settings.NONCE_TTL_SECONDS)
+    success = await cache.get_redis().set(nonce_key, "1", nx=True, ex=settings.NONCE_TTL_SECONDS)
     if not success:
         raise AuthException("重复请求")
 

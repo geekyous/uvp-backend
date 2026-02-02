@@ -4,18 +4,19 @@ import uvicorn
 from fastapi import FastAPI, Request
 from starlette.responses import JSONResponse
 
-from app.core.exception import AuthException, BizException
-from app.core.log.config import setup_logging
+from app.core.lifespan import lifespan
+from app.core.logger import setup_logging
 from app.core.response import ApiResponse
+from app.exceptions.exceptions import AuthException, BizException
 
 setup_logging()
-from app.core.lifespan import lifespan
 from app.core.routers import include_routes
 
 app = FastAPI(
     title="UVP平台服务目录",
     description="UVP平台服务目录测试接口",
-    lifespan=lifespan)
+    lifespan=lifespan
+)
 
 include_routes(app)
 

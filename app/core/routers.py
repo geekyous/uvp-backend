@@ -1,8 +1,7 @@
-from app.api import auth, resources
-from app.core.log.middleware import RequestIDMiddleware
+from app.api import user_api, auth_api, resource_api
 
 
 def include_routes(app):
-    app.add_middleware(RequestIDMiddleware)
-    app.include_router(auth.router)
-    app.include_router(resources.router)
+    app.include_router(user_api.router)
+    app.include_router(auth_api.router)
+    app.include_router(resource_api.router)
