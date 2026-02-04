@@ -51,7 +51,7 @@ async def main():
     """异步主函数"""
     config = uvicorn.Config(
         app=app,
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=8000,
         log_level="info",
         loop="asyncio"

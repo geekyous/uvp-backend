@@ -1,3 +1,4 @@
+import base64
 import logging
 
 from fastapi import APIRouter
@@ -6,9 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.response import fail, success
+from app.services.token_service import TokenService
 from app.vo.api_credential import AuthorizationVO
 from app.vo.auth_params import AuthRequest, ValidateTokenRequest
-from app.services.token_service import TokenService
 
 router = APIRouter(prefix="/uvp-backend-common/api/v1", tags=["应用集成授权"], )
 
@@ -26,7 +27,7 @@ async def authorization(auth_req: AuthRequest, db: AsyncSession = Depends(get_db
     if ak is None or sk is None:
         return fail(result_hint="AK/SK 不能为空")
     security_key = await TokenService.get_secret_by_ak(db, ak)
-    if not security_key or security_key != sk:
+    if not security_key or base64.b64encode(security_key.encode("utf-8")).decode() != sk:
         return fail(result_hint="AK/SK 无效")
 
     token = await TokenService.create_token(ak)

@@ -38,7 +38,8 @@ class DeviceResourceDAO:
             stmt = stmt.where(DeviceResource.pid == pid)
         if dev_type:
             stmt = stmt.where(DeviceResource.dev_type.in_(dev_type))
-        stmt = stmt.where(DeviceResource.status == status)
+        if status is not None:
+            stmt = stmt.where(DeviceResource.status == status)
 
         stmt = stmt.order_by(DeviceResource.order)
         result = await db.execute(stmt)
