@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.response import fail, success
-from app.schemas.auth_params import AuthRequest, ValidateTokenRequest
+from app.vo.api_credential import AuthorizationVO
+from app.vo.auth_params import AuthRequest, ValidateTokenRequest
 from app.services.token_service import TokenService
 
 router = APIRouter(prefix="/uvp-backend-common/api/v1", tags=["应用集成授权"], )
@@ -23,16 +24,16 @@ async def authorization(auth_req: AuthRequest, db: AsyncSession = Depends(get_db
     ak = auth_req.ak
     sk = auth_req.sk
     if ak is None or sk is None:
-        return fail(hint="AK/SK 不能为空")
+        return fail(result_hint="AK/SK 不能为空")
     security_key = await TokenService.get_secret_by_ak(db, ak)
     if not security_key or security_key != sk:
-        return fail(hint="AK/SK 无效")
+        return fail(result_hint="AK/SK 无效")
 
     token = await TokenService.create_token(ak)
-    return success({
-        "ak": ak,
-        "token": token
-    })
+    return success(AuthorizationVO(
+        ak=ak,
+        token=token
+    ))
 
 
 @router.post("/validateToken",

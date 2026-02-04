@@ -26,7 +26,7 @@ async def auth_exception_handler(request: Request, exc: AuthException):
     return JSONResponse(
         status_code=401,
         content=ApiResponse(
-            successful="true",
+            successful=True,
             resultCode=200,
             resultHint=str(exc),
             resultValue=None
@@ -39,7 +39,7 @@ async def biz_exception_handler(request: Request, exc: BizException):
     return JSONResponse(
         status_code=200,
         content=ApiResponse(
-            successful="true",
+            successful=True,
             resultCode=500,
             resultHint=str(exc),
             resultValue=None

@@ -8,7 +8,7 @@ from app.core import cache
 from app.core.config import settings
 from app.core.database import get_db
 from app.exceptions.exceptions import AuthException
-from app.schemas.auth_params import AuthParams
+from app.vo.auth_params import AuthParams
 from app.services.token_service import TokenService
 
 
@@ -36,10 +36,10 @@ async def auth_dependency(auth: AuthParams = Depends()):
         raise AuthException("AK 无效")
 
 
-def check_timestamp(ts: float):
+def check_timestamp(ts: str):
     """时间窗口校验"""
     now = int(time.time())
-    if abs(now - ts) > settings.NONCE_TTL_SECONDS:
+    if abs(now - int(ts)) > settings.NONCE_TTL_SECONDS:
         raise AuthException("请求已过期")
 
 

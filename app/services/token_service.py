@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cache import get_redis
 from app.core.config import settings
-from app.dao.api_credential_dao import ApiCredentialDao
+from app.dao.api_credential_dao import ApiCredentialDAO
 
 
 class TokenService:
@@ -13,7 +13,7 @@ class TokenService:
         """
         根据 AK 获取 SK
         """
-        return await ApiCredentialDao.get_secret_by_ak(db, access_key)
+        return await ApiCredentialDAO.get_secret_by_ak(db, access_key)
 
     @staticmethod
     async def create_token(ak: str):

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import Column, DateTime, func
 from sqlalchemy.orm import declarative_base
 
@@ -32,7 +32,8 @@ def to_camel(string: str) -> str:
 
 
 class CamelModel(BaseModel):
-    class Config:
-        alias_generator = to_camel
-        validate_by_name = True
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        alias_generator=to_camel,
+        populate_by_name=True,
+    )
