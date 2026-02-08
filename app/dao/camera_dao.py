@@ -86,3 +86,15 @@ class CameraDAO:
         )
         await db.execute(stmt)
         await db.flush()
+
+    @staticmethod
+    async def list_by_project(db: AsyncSession, project_code: str) -> list[Camera]:
+        """根据项目代码查询布控球列表（通过camera_no前缀匹配）"""
+        # camera_no格式为: 项目id_序号，例如: 1429401969336320_01
+        pattern = f"{project_code}_%"
+        stmt = select(Camera).where(
+            Camera.camera_no.like(pattern),
+            Camera.delete_flag == 0
+        )
+        result = await db.execute(stmt)
+        return list(result.scalars().all())

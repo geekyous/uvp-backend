@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试数据管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background-color: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0 0 16px 0;
+            color: #333;
+        }
+
+        .header p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background-color: #f8f9fa;
+            padding: 16px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1890ff;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status.empty {
+            background-color: #e9ecef;
+            color: #004085;
+        }
+
+        .status.has-data {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button.primary {
+            background-color: #1890ff;
+            color: #fff;
+        }
+
+        button.primary:hover {
+            background-color: #0d6efd;
+        }
+
+        button.danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        button.danger:hover {
+            background-color: #c82333;
+        }
+
+        button.secondary {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .message.loading {
+            background-color: #e2e3f5;
+            color: #fff;
+            border: 1px solid #d6d9fd;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        .data-status {
+            margin-top: 12px;
+            padding: 12px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #004085;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-content {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 测试数据管理</h1>
+            <p>基于实际业务数据自动生成测试数据，包括设备资源、布控球、站班会、作业票和关联关系</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 当前数据状态</div>
+            <div id="statusCard" class="data-status">
+                <span class="status empty">📭 空数据</span>
+            </div>
+            <div class="stats-grid" id="statsGrid" style="display: none;">
+                <div class="stat-item">
+                    <div class="stat-label">设备资源</div>
+                    <div class="stat-value" id="deviceResources">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">布控球</div>
+                    <div class="stat-value" id="cameras">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">站班会</div>
+                    <div class="stat-value" id="toolBoxTalks">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">作业票</div>
+                    <div class="stat-value" id="workTickets">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">关联关系</div>
+                    <div class="stat-value" id="relations">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🎮 数据操作</div>
+            <div class="button-group">
+                <button class="primary" onclick="checkStatus()">
+                    📋 查看数据状态
+                </button>
+                <button class="secondary" onclick="refreshPage()">
+                    🔄 刷新页面
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🚀 批量生成</div>
+            <div class="button-group">
+                <button class="primary" onclick="generateAllData()">
+                    🎯 生成全部数据
+                </button>
+                <button class="danger" onclick="clearAllData()">
+                    🗑️ 清空所有数据
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📦 按需生成</div>
+            <div class="button-group">
+                <button class="primary" onclick="generateDeviceResources()">
+                    🏗️ 生成设备资源
+                </button>
+                <button class="primary" onclick="generateCameras()">
+                    📹 生成布控球
+                </button>
+                <button class="primary" onclick="generateToolBoxTalks()">
+                    📋 生成站班会
+                </button>
+                <button class="primary" onclick="generateRelations()">
+                    🔗 生成关联关系
+                </button>
+            </div>
+        </div>
+
+        <div id="messageArea"></div>
+
+        <div class="card">
+            <div class="card-title">⚙️ 生成配置</div>
+            <div style="display: flex; align-items: center; gap: 16px; margin-top: 16px;">
+                <label for="projectLimit" style="font-size: 14px; color: #666;">使用项目数量:</label>
+                <select id="projectLimit" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    <option value="1">1 个项目</option>
+                    <option value="2" selected>2 个项目（默认）</option>
+                    <option value="3">3 个项目</option>
+                    <option value="5">5 个项目</option>
+                    <option value="10">10 个项目</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <div style="margin-top: 16px; font-size: 16px; font-weight: 500;">处理中...</div>
+        </div>
+    </div>
+
+  <script>
+        const API_BASE_URL = '';
+
+        async function checkStatus() {
+            showMessage('info', '正在查询数据状态...');
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/test-data/status`);
+                const data = await response.json();
+
+                if (data.successful) {
+                    displayStats(data.resultValue);
+                    showMessage('success', '数据状态查询成功！');
+                    document.getElementById('statusCard').innerHTML =
+                        '<span class="status has-data">✓ 有数据</span>';
+                } else {
+                    showMessage('error', data.resultHint || '查询失败');
+                    document.getElementById('statusCard').innerHTML =
+                        '<span class="status empty">📭 空数据</span>';
+                    document.getElementById('statsGrid').style.display = 'none';
+                }
+            } catch (error) {
+                showMessage('error', `查询失败: ${error.message}`);
+                document.getElementById('statusCard').innerHTML =
+                    '<span class="status empty">📭 空数据</span>';
+                document.getElementById('statsGrid').style.display = 'none';
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function generateAllData() {
+            const projectLimit = document.getElementById('projectLimit').value;
+
+            if (!confirm(`确定要生成所有测试数据？将使用 ${projectLimit} 个项目。`)) {
+                return;
+            }
+
+            showMessage('info', `正在生成所有测试数据，使用 ${projectLimit} 个项目...`);
+            showLoading(true);
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/test-data/generate?project_limit=${projectLimit}`,
+                    { method: 'POST' }
+                );
+                const data = await response.json();
+
+                if (data.successful) {
+                    displayStats(data.resultValue);
+                    showMessage('success', `${data.resultHint}`);
+                    document.getElementById('statusCard').innerHTML =
+                        '<span class="status has-data">✓ 有数据</span>';
+                } else {
+                    showMessage('error', data.resultHint || '生成失败');
+                }
+            } catch (error) {
+                showMessage('error', `生成失败: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function generateDeviceResources() {
+            const projectLimit = document.getElementById('projectLimit').value;
+
+            if (!confirm(`确定要生成设备资源树？将使用 ${projectLimit} 个项目。`)) {
+                return;
+            }
+
+            showMessage('info', `正在生成设备资源树，使用 ${projectLimit} 个项目...`);
+            showLoading(true);
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/test-data/generate/device-resources?project_limit=${projectLimit}`,
+                    { method: 'POST' }
+                );
+                const data = await response.json();
+
+                if (data.successful) {
+                    displayStats(data.resultValue);
+                    showMessage('success', `${data.resultHint}`);
+                    document.getElementById('statusCard').innerHTML =
+                        '<span class="status has-data">✓ 有数据</span>';
+                } else {
+                    showMessage('error', data.resultHint || '生成失败');
+                }
+            } catch (error) {
+                showMessage('error', `生成失败: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function generateCameras() {
+            const projectLimit = document.getElementById('projectLimit').value;
+
+            if (!confirm(`确定要生成布控球？将使用 ${projectLimit} 个项目。`)) {
+                return;
+            }
+
+            showMessage('info', `正在生成布控球，使用 ${projectLimit} 个项目...`);
+            showLoading(true);
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/test-data/generate/cameras?project_limit=${projectLimit}`,
+                    { method: 'POST' }
+                );
+                const data = await response.json();
+
+                if (data.successful) {
+                    displayStats(data.resultValue);
+                    showMessage('success', `${data.resultHint}`);
+                    document.getElementById('statusCard').innerHTML =
+                        '<span class="status has-data">✓ 有数据</span>';
+                } else {
+                    showMessage('error', data.resultHint || '生成失败');
+                }
+            } catch (error) {
+                showMessage('error', `生成失败: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function generateToolBoxTalks() {
+            const projectLimit = document.getElementById('projectLimit').value;
+
+            if (!confirm(`确定要生成站班会？将使用 ${projectLimit} 个项目。`)) {
+                return;
+            }
+
+            showMessage('info', `正在生成站班会，使用 ${projectLimit} 个项目...`);
+            showLoading(true);
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/test-data/generate/tool-box-talks?project_limit=${projectLimit}`,
+                    { method: 'POST' }
+                );
+                const data = await response.json();
+
+                if (data.successful) {
+                    displayStats(data.resultValue);
+                    showMessage('success', `${data.resultHint}`);
+                    document.getElementById('statusCard').innerHTML =
+                        '<span class="status has-data">✓ 有数据</span>';
+                } else {
+                    showMessage('error', data.resultHint || '生成失败');
+                }
+            } catch (error) {
+                showMessage('error', `生成失败: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function generateRelations() {
+            const projectLimit = document.getElementById('projectLimit').value;
+
+            if (!confirm(`确定要生成关联关系？将使用 ${projectLimit} 个项目。`)) {
+                return;
+            }
+
+            showMessage('info', `正在生成关联关系，使用 ${projectLimit} 个项目...`);
+            showLoading(true);
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/test-data/generate/relations?project_limit=${projectLimit}`,
+                    { method: 'POST' }
+                );
+                const data = await response.json();
+
+                if (data.successful) {
+                    displayStats(data.resultValue);
+                    showMessage('success', `${data.resultHint}`);
+                    document.getElementById('statusCard').innerHTML =
+                        '<span class="status has-data">✓ 有数据</span>';
+                } else {
+                    showMessage('error', data.resultHint || '生成失败');
+                }
+            } catch (error) {
+                showMessage('error', `生成失败: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function clearAllData() {
+            if (!confirm('⚠️ 确定要清空所有测试数据？此操作不可恢复！')) {
+                return;
+            }
+
+            if (!confirm('🚨 再次确认：此操作将删除所有测试数据，请谨慎操作！')) {
+                return;
+            }
+
+            showMessage('info', '正在清空测试数据...');
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/test-data/clear`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.successful) {
+                    showMessage('success', data.resultHint);
+                    resetStats();
+                    document.getElementById('statusCard').innerHTML =
+                        '<span class="status empty">📭 空数据</span>';
+                } else {
+                    showMessage('error', data.resultHint || '清空失败');
+                }
+            } catch (error) {
+                showMessage('error', `清空失败: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function displayStats(stats) {
+            console.log('displayStats called with:', stats);
+            if (!stats) {
+                console.error('stats is undefined!');
+                return;
+            }
+            document.getElementById('deviceResources').textContent =
+                stats.device_resources || 0;
+            document.getElementById('cameras').textContent =
+                stats.cameras || 0;
+            document.getElementById('toolBoxTalks').textContent =
+                stats.tool_box_talks || 0;
+            document.getElementById('workTickets').textContent =
+                stats.construction_work_tickets || 0;
+            document.getElementById('relations').textContent =
+                stats.relations || 0;
+
+            document.getElementById('statsGrid').style.display = 'grid';
+        }
+
+        function resetStats() {
+            document.getElementById('deviceResources').textContent = '0';
+            document.getElementById('cameras').textContent = '0';
+            document.getElementById('toolBoxTalks').textContent = '0';
+            document.getElementById('workTickets').textContent = '0';
+            document.getElementById('relations').textContent = '0';
+            document.getElementById('statsGrid').style.display = 'none';
+        }
+
+        function showMessage(type, text) {
+            const messageArea = document.getElementById('messageArea');
+            const className = `message ${type}`;
+            messageArea.innerHTML = `<div class="${className}">${text}</div>`;
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (messageArea.querySelector('.message.success')) {
+                        messageArea.querySelector('.message.success').style.display = 'none';
+                    }
+                }, 5000);
+            }
+        }
+
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            if (!overlay) {
+                return;
+            }
+            if (show) {
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        window.onload = function() {
+            checkStatus();
+        };
+    </script>
+</body>
+</html>

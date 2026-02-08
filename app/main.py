@@ -1,16 +1,17 @@
 import asyncio
-
 import uvicorn
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from starlette.responses import JSONResponse
 
 from app.core.lifespan import lifespan
 from app.core.logger import setup_logging
 from app.core.response import ApiResponse
 from app.exceptions.exceptions import AuthException, BizException
+from app.core.routers import include_routes
 
 setup_logging()
-from app.core.routers import include_routes
 
 app = FastAPI(
     title="UVP平台服务目录",
@@ -18,7 +19,25 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# 前端和后端在同一端口，不需要 CORS 中间件
+# 如需跨域访问，请取消注释以下配置
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=[
+#         "http://localhost:8080",
+#         "http://127.0.0.1:8080",
+#         "null"  # 允许所有来源
+#     ],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
 include_routes(app)
+
+# 挂载静态文件目录
+app.mount("/web", StaticFiles(directory="app/web"), name="web")
 
 
 @app.exception_handler(AuthException)

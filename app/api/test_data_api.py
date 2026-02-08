@@ -10,16 +10,17 @@ router = APIRouter(prefix="/test-data", tags=["测试数据管理"])
 
 @router.post("/generate", response_model=ApiResponse)
 async def generate_test_data(
-        project_limit: int = 2,
-        db: AsyncSession = Depends(get_db)
+    project_limit: int = 2,
+    db: AsyncSession = Depends(get_db)
 ) -> ApiResponse:
     """
-    生成测试数据
+    生成所有测试数据
 
     根据ps_single_project_info中的真实项目数据，生成测试用的：
     - device_resource（设备资源树）
     - camera（布控球）
     - tool_box_talk（站班会）
+    - construction_work_ticket（施工作业票）
     - toolboxtalk_camera_rela（关联关系）
 
     Args:
@@ -31,24 +32,138 @@ async def generate_test_data(
     """
     try:
         result = await TestDataService.generate_test_data(db, project_limit)
-        return success(result_hint=f"成功生成测试数据：{result['device_resources']}个设备资源，"
-                                   f"{result['cameras']}个布控球，{result['tool_box_talks']}个站班会，"
-                                   f"{result['relations']}条关联关系")
+        return success(
+            data=result,
+            result_hint=f"成功生成测试数据：{result['device_resources']}个设备资源，"
+                        f"{result['cameras']}个布控球，"
+                        f"{result['tool_box_talks']}个站班会，"
+                        f"{result['construction_work_tickets']}个作业票，"
+                        f"{result['relations']}条关联关系"
+        )
     except ValueError as e:
         return fail(result_hint=str(e))
     except Exception as e:
-        return fail(result_hint=f"生成测试数据失败：{str(e)}")
+        raise e
+
+
+@router.post("/generate/device-resources", response_model=ApiResponse)
+async def generate_device_resources(
+    project_limit: int = 2,
+    db: AsyncSession = Depends(get_db)
+) -> ApiResponse:
+    """
+    只生成设备资源树
+
+    Args:
+        project_limit: 使用的项目数量（默认2个）
+        db: 数据库会话
+
+    Returns:
+        生成结果统计
+    """
+    try:
+        result = await TestDataService.generate_device_resources(db, project_limit)
+        return success(
+            data=result,
+            result_hint=f"成功生成设备资源：{result['device_resources']}个"
+        )
+    except ValueError as e:
+        return fail(result_hint=str(e))
+    except Exception as e:
+        raise e
+
+
+@router.post("/generate/cameras", response_model=ApiResponse)
+async def generate_cameras(
+    project_limit: int = 2,
+    db: AsyncSession = Depends(get_db)
+) -> ApiResponse:
+    """
+    只生成布控球（设备）
+
+    Args:
+        project_limit: 使用的项目数量（默认2个）
+        db: 数据库会话
+
+    Returns:
+        生成结果统计
+    """
+    try:
+        result = await TestDataService.generate_cameras(db, project_limit)
+        return success(
+            data=result,
+            result_hint=f"成功生成布控球：{result['cameras']}个，设备资源：{result['device_resources']}个"
+        )
+    except ValueError as e:
+        return fail(result_hint=str(e))
+    except Exception as e:
+        raise e
+
+
+@router.post("/generate/tool-box-talks", response_model=ApiResponse)
+async def generate_tool_box_talks(
+    project_limit: int = 2,
+    db: AsyncSession = Depends(get_db)
+) -> ApiResponse:
+    """
+    只生成站班会
+
+    Args:
+        project_limit: 使用的项目数量（默认2个）
+        db: 数据库会话
+
+    Returns:
+        生成结果统计
+    """
+    try:
+        result = await TestDataService.generate_tool_box_talks(db, project_limit)
+        return success(
+            data=result,
+            result_hint=f"成功生成站班会：{result['tool_box_talks']}个，作业票：{result['construction_work_tickets']}个"
+        )
+    except ValueError as e:
+        return fail(result_hint=str(e))
+    except Exception as e:
+        raise e
+
+
+@router.post("/generate/relations", response_model=ApiResponse)
+async def generate_relations(
+    project_limit: int = 2,
+    db: AsyncSession = Depends(get_db)
+) -> ApiResponse:
+    """
+    生成关联关系（站班会与布控球的关联）
+
+    Args:
+        project_limit: 使用的项目数量（默认2个）
+        db: 数据库会话
+
+    Returns:
+        生成结果统计
+    """
+    try:
+        result = await TestDataService.generate_relations(db, project_limit)
+        return success(
+            data=result,
+            result_hint=f"成功生成关联关系：{result['relations']}条"
+        )
+    except ValueError as e:
+        return fail(result_hint=str(e))
+    except Exception as e:
+        raise e
 
 
 @router.delete("/clear", response_model=ApiResponse)
 async def clear_test_data(
-        db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ) -> ApiResponse:
     """
     清空所有测试数据
 
     删除以下表的所有数据（按外键依赖顺序）：
     - toolboxtalk_camera_rela
+    - construction_work_ticket
     - camera
     - tool_box_talk
     - device_resource
@@ -60,17 +175,21 @@ async def clear_test_data(
     """
     try:
         result = await TestDataService.clear_test_data(db)
-        return success(result_hint=f"成功清空测试数据：删除{result['relations']}条关联，"
-                                   f"{result['cameras']}个布控球，{result['tool_box_talks']}个站班会，"
-                                   f"{result['device_resources']}个设备资源")
-
+        return success(
+            data=result,
+            result_hint=f"成功清空测试数据：删除{result['relations']}条关联，"
+                        f"{result['construction_work_tickets']}个作业票，"
+                        f"{result['cameras']}个布控球，"
+                        f"{result['tool_box_talks']}个站班会，"
+                        f"{result['device_resources']}个设备资源"
+        )
     except Exception as e:
         return fail(result_hint=f"清空测试数据失败：{str(e)}")
 
 
 @router.get("/status")
 async def get_test_data_status(
-        db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ) -> ApiResponse:
     """
     查看当前测试数据状态
@@ -84,17 +203,20 @@ async def get_test_data_status(
         from app.models.camera import Camera
         from app.models.tool_box_talk import ToolBoxTalk
         from app.models.camera_rela import ToolBoxTalkCameraRela
+        from app.models.construction_work_ticket import ConstructionWorkTicket
 
         # 统计各表记录数
         device_count = await db.scalar(select(func.count(DeviceResource.id)))
         camera_count = await db.scalar(select(func.count(Camera.id)))
         talk_count = await db.scalar(select(func.count(ToolBoxTalk.id)))
+        ticket_count = await db.scalar(select(func.count(ConstructionWorkTicket.id)))
         rela_count = await db.scalar(select(func.count(ToolBoxTalkCameraRela.id)))
 
         status = {
             "device_resources": device_count or 0,
             "cameras": camera_count or 0,
             "tool_box_talks": talk_count or 0,
+            "construction_work_tickets": ticket_count or 0,
             "relations": rela_count or 0
         }
 
